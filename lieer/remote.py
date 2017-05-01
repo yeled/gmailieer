@@ -166,7 +166,14 @@ class Remote:
     def _cb (rid, resp, excep):
       nonlocal j
       if excep is not None:
-        if type(excep) is googleapiclient.errors.HttpError and excep.resp.status == 404:
+        if type(excep) is googleapiclient.errors.HttpError and excep.resp.status == 400:
+          # We are pushing the wrong labelId based on the mid (aka there are
+          # duplicates.
+          print ("remote: could not find remote message: %s!" % mids[j])
+          j += 1
+          return
+
+        elif type(excep) is googleapiclient.errors.HttpError and excep.resp.status == 404:
           # message could not be found this is probably a deleted message, spam or draft
           # message since these are not included in the messages.get() query by default.
           print ("remote: could not find remote message: %s!" % mids[j])
